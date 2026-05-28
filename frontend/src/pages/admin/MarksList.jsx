@@ -39,7 +39,7 @@ const MarksList = () => {
 
         <Layout>
 
-            <div className="p-6 bg-gray-100">
+            <div className="p-6">
 
                 {/* Heading */}
                 <div className="mb-6">

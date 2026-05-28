@@ -52,7 +52,7 @@ const StudentList = () => {
 
         <Layout>
 
-            <div className="p-6 bg-gray-100 h-full">
+            <div className="p-6">
 
                 {/* Top Section */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
