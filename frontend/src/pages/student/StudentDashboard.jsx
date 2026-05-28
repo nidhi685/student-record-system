@@ -6,7 +6,7 @@ const StudentDashboard = () => {
 
     const [marks, setMarks] = useState([]);
 
-    // Get Marks
+    // GET MARKS
     const getMarks = async () => {
 
         try {
@@ -27,6 +27,23 @@ const StudentDashboard = () => {
 
     }, []);
 
+    // TOTAL %
+    const overallPercentage =
+        marks.length > 0
+            ? (
+                marks.reduce(
+                    (acc, item) => acc + item.marks,
+                    0
+                ) / marks.length
+            ).toFixed(1)
+            : 0;
+
+    // PASS / FAIL
+    const resultStatus =
+        overallPercentage >= 35
+            ? "PASS"
+            : "FAIL";
+
     return (
 
         <Layout>
@@ -34,7 +51,6 @@ const StudentDashboard = () => {
             <div className="p-6">
 
                 {/* Heading */}
-
                 <div className="mb-6">
 
                     <h1 className="text-3xl font-bold text-gray-800">
@@ -42,94 +58,190 @@ const StudentDashboard = () => {
                     </h1>
 
                     <p className="text-gray-500 mt-1">
-                        View your subject marks and grades
+                        Welcome back 👋
                     </p>
 
                 </div>
 
-                {/* Cards */}
+                {/* CARDS */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+                    {/* Total Subjects */}
+                    <div className="bg-blue-500 text-white rounded-2xl p-5 shadow-lg">
 
-                    <div className="bg-blue-500 text-white rounded-xl p-5 shadow-md">
                         <h2 className="text-lg font-semibold">
                             Total Subjects
                         </h2>
 
-                        <p className="text-3xl font-bold mt-2">
+                        <p className="text-4xl font-bold mt-3">
                             {marks.length}
                         </p>
+
                     </div>
 
-                    <div className="bg-green-500 text-white rounded-xl p-5 shadow-md">
+                    {/* Overall Percentage */}
+                    <div className="bg-green-500 text-white rounded-2xl p-5 shadow-lg">
+
+                        <h2 className="text-lg font-semibold">
+                            Overall %
+                        </h2>
+
+                        <p className="text-4xl font-bold mt-3">
+                            {overallPercentage}%
+                        </p>
+
+                    </div>
+
+                    {/* Highest Marks */}
+                    <div className="bg-purple-500 text-white rounded-2xl p-5 shadow-lg">
+
                         <h2 className="text-lg font-semibold">
                             Highest Marks
                         </h2>
 
-                        <p className="text-3xl font-bold mt-2">
+                        <p className="text-4xl font-bold mt-3">
                             {
                                 marks.length > 0
-                                    ? Math.max(...marks.map((m) => m.marks))
+                                    ? Math.max(
+                                        ...marks.map((m) => m.marks)
+                                    )
                                     : 0
                             }
                         </p>
+
                     </div>
 
-                    <div className="bg-purple-500 text-white rounded-xl p-5 shadow-md">
+                    {/* Result Status */}
+                    <div
+                        className={`rounded-2xl p-5 shadow-lg text-white
+                        
+                        ${resultStatus === "PASS"
+                                ? "bg-emerald-500"
+                                : "bg-red-500"
+                            }`}
+                    >
+
                         <h2 className="text-lg font-semibold">
-                            Average Marks
+                            Result Status
                         </h2>
 
-                        <p className="text-3xl font-bold mt-2">
-                            {
-                                marks.length > 0
-                                    ? (
-                                        marks.reduce(
-                                            (acc, item) => acc + item.marks,
-                                            0
-                                        ) / marks.length
-                                    ).toFixed(1)
-                                    : 0
-                            }
+                        <p className="text-4xl font-bold mt-3">
+                            {resultStatus}
                         </p>
+
                     </div>
 
                 </div>
 
-                <div className="bg-white rounded-xl shadow-md p-6">
+                {/* Semester Result */}
+                <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
 
-                    <h2 className="text-xl font-semibold text-gray-700 mb-4">
-                        Recent Subjects
-                    </h2>
+                    <div className="flex justify-between items-center mb-5">
 
-                    <div className="space-y-3">
+                        <h2 className="text-2xl font-bold text-gray-800">
+                            Semester Result
+                        </h2>
 
-                        {marks.slice(0, 3).map((m) => (
+                        <select className="border px-4 py-2 rounded-lg outline-none">
 
-                            <div
-                                key={m._id}
-                                className="flex justify-between items-center border-b pb-3"
-                            >
+                            <option>
+                                Semester 1
+                            </option>
 
-                                <div>
+                            <option>
+                                Semester 2
+                            </option>
 
-                                    <p className="font-medium text-gray-800">
-                                        {m.subject}
-                                    </p>
+                            <option>
+                                Semester 3
+                            </option>
 
-                                    <p className="text-sm text-gray-500">
-                                        Grade: {m.grade}
-                                    </p>
+                            <option>
+                                Semester 4
+                            </option>
 
-                                </div>
+                        </select>
 
-                                <div className="text-lg font-bold text-blue-600">
-                                    {m.marks}
-                                </div>
+                    </div>
 
-                            </div>
+                    <div className="overflow-x-auto">
 
-                        ))}
+                        <table className="w-full">
+
+                            <thead className="bg-gray-100">
+
+                                <tr>
+
+                                    <th className="p-4 text-left">
+                                        Subject
+                                    </th>
+
+                                    <th className="p-4 text-left">
+                                        Marks
+                                    </th>
+
+                                    <th className="p-4 text-left">
+                                        Grade
+                                    </th>
+
+                                    <th className="p-4 text-left">
+                                        Status
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                {marks.map((m) => (
+
+                                    <tr
+                                        key={m._id}
+                                        className="border-b hover:bg-gray-50"
+                                    >
+
+                                        <td className="p-4 font-medium">
+                                            {m.subject}
+                                        </td>
+
+                                        <td className="p-4">
+                                            {m.marks}
+                                        </td>
+
+                                        <td className="p-4">
+
+                                            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                                                {m.grade}
+                                            </span>
+
+                                        </td>
+
+                                        <td className="p-4">
+
+                                            {m.marks >= 35 ? (
+
+                                                <span className="text-green-600 font-semibold">
+                                                    Pass
+                                                </span>
+
+                                            ) : (
+
+                                                <span className="text-red-600 font-semibold">
+                                                    Fail
+                                                </span>
+
+                                            )}
+
+                                        </td>
+
+                                    </tr>
+
+                                ))}
+
+                            </tbody>
+
+                        </table>
 
                     </div>
 
