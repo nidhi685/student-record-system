@@ -5,6 +5,7 @@ import API from "../services/api";
 import { AuthContext } from "../context/AuthContext";
 
 import { Link, useNavigate } from "react-router-dom";
+
 import { EyeIcon, EyeOff } from "lucide-react";
 
 const Login = () => {
@@ -138,9 +139,6 @@ const Login = () => {
           <Link to="/register" className="text-blue-600 font-semibold">
             Register
           </Link>
-        </p>
-
-        <p className="text-center mt-4 text-sm text-gray-500">
           Student accounts are created by admin only.
         </p>
       </form>
