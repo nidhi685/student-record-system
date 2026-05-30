@@ -1,5 +1,7 @@
 const Student = require("../models/Student");
 const Marks = require("../models/Marks");
+const Attendance = require("../models/Attendence");
+
 const bcrypt = require("bcryptjs");
 const generateToken = require("../utils/generateToken");
 
@@ -114,5 +116,25 @@ exports.getMarks = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+};
+
+// GET MY ATTENDANCE
+exports.getMyAttendance = async (req, res) => {
+    try {
+        const attendance = await Attendance.find({
+            studentId: req.user.id,
+        });
+
+        res.status(200).json({
+            success: true,
+            attendance,
+        });
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            message: "Server Error",
+        });
     }
 };

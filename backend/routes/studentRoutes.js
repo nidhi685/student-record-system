@@ -7,6 +7,7 @@ const {
     updateProfile,
     changePassword,
     getMarks,
+    getMyAttendance,
 } = require("../controllers/studentController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -25,5 +26,5 @@ router.put("/change-password", authMiddleware, changePassword);
 
 //view marks
 router.get("/marks", authMiddleware, getMarks);
-
+router.get("/my-attendance", authMiddleware, getMyAttendance);
 module.exports = router;

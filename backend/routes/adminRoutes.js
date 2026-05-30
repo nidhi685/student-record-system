@@ -12,7 +12,13 @@ const {
     getDashboard,
     searchStudent,
     addMarks,
-    getAllMarks
+    getAllMarks,
+    getResultAnalytics,
+    getReports,
+    getAdminProfile,
+    updateAdminProfile,
+    addAttendance,
+    getAttendance,
 } = require("../controllers/adminController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -53,5 +59,13 @@ router.post("/add-marks", authMiddleware, addMarks);
 
 //get all student marks
 router.get("/marks", getAllMarks);
+router.get("/results-analytics", authMiddleware, getResultAnalytics);
 
+router.get("/reports", authMiddleware, getReports);
+
+router.get("/profile", authMiddleware, getAdminProfile);
+
+router.put("/update-profile", authMiddleware, updateAdminProfile);
+router.post("/add-attendance", authMiddleware, addAttendance);
+router.get("/attendance", authMiddleware, getAttendance);
 module.exports = router;

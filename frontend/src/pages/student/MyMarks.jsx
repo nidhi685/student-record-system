@@ -31,7 +31,7 @@ const MyMarks = () => {
 
         <Layout>
 
-            <div className="p-6 bg-gray-100">
+            <div className="p-6">
 
                 {/* Heading */}
                 <div className="mb-6">
@@ -46,28 +46,29 @@ const MyMarks = () => {
 
                 </div>
 
-                {/* Table */}
-                <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+                {/* Marks Table */}
+                <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
 
                     <table className="w-full">
 
+                        {/* Table Head */}
                         <thead className="bg-gray-100">
 
                             <tr>
 
-                                <th className="p-4 text-left">
+                                <th className="p-4 text-left font-semibold text-gray-700">
                                     Subject
                                 </th>
 
-                                <th className="p-4 text-left">
+                                <th className="p-4 text-left font-semibold text-gray-700">
                                     Marks
                                 </th>
 
-                                <th className="p-4 text-left">
+                                <th className="p-4 text-left font-semibold text-gray-700">
                                     Grade
                                 </th>
 
-                                <th className="p-4 text-left">
+                                <th className="p-4 text-left font-semibold text-gray-700">
                                     Status
                                 </th>
 
@@ -75,6 +76,7 @@ const MyMarks = () => {
 
                         </thead>
 
+                        {/* Table Body */}
                         <tbody>
 
                             {marks.length > 0 ? (
@@ -83,36 +85,40 @@ const MyMarks = () => {
 
                                     <tr
                                         key={m._id}
-                                        className="border-t hover:bg-gray-50"
+                                        className="border-t hover:bg-gray-50 transition"
                                     >
 
-                                        <td className="p-4 font-medium">
+                                        {/* Subject */}
+                                        <td className="p-4 font-medium text-gray-800">
                                             {m.subject}
                                         </td>
 
-                                        <td className="p-4">
+                                        {/* Marks */}
+                                        <td className="p-4 text-gray-700">
                                             {m.marks}
                                         </td>
 
+                                        {/* Grade */}
                                         <td className="p-4">
 
-                                            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                                            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
                                                 {m.grade}
                                             </span>
 
                                         </td>
 
+                                        {/* Status */}
                                         <td className="p-4">
 
                                             {m.marks >= 35 ? (
 
-                                                <span className="text-green-600 font-semibold">
+                                                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
                                                     Pass
                                                 </span>
 
                                             ) : (
 
-                                                <span className="text-red-600 font-semibold">
+                                                <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold">
                                                     Fail
                                                 </span>
 
@@ -130,7 +136,7 @@ const MyMarks = () => {
 
                                     <td
                                         colSpan="4"
-                                        className="text-center p-6 text-gray-500"
+                                        className="text-center p-8 text-gray-500"
                                     >
                                         No Marks Available
                                     </td>
