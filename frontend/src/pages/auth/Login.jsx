@@ -139,7 +139,9 @@ const Login = () => {
           <Link to="/register" className="text-blue-600 font-semibold">
             Register
           </Link>
-          Student accounts are created by admin only.
+          <p className="text-sm text-gray-500">
+            Student accounts are created by admin only.
+          </p>
         </p>
       </form>
     </div>
