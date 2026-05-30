@@ -134,15 +134,20 @@ const Login = () => {
           Login
         </button>
 
-        <p className="text-center mt-5 text-sm">
-          Don't have an account?{" "}
-          <Link to="/register" className="text-blue-600 font-semibold">
-            Register
-          </Link>
-          <p className="text-sm text-gray-500">
+        {role === "admin" ? (
+          <div className="text-center mt-5">
+            <p className="text-sm">
+              Don't have an account?{" "}
+              <Link to="/register" className="text-blue-600 font-semibold">
+                Register
+              </Link>
+            </p>
+          </div>
+        ) : (
+          <p className="text-center mt-5 text-sm text-gray-500">
             Student accounts are created by admin only.
           </p>
-        </p>
+        )}
       </form>
     </div>
   );
