@@ -19,6 +19,8 @@ const {
     updateAdminProfile,
     addAttendance,
     getAttendance,
+    addSubject,
+    getSubjects,
 } = require("../controllers/adminController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -68,4 +70,8 @@ router.get("/profile", authMiddleware, getAdminProfile);
 router.put("/update-profile", authMiddleware, updateAdminProfile);
 router.post("/add-attendance", authMiddleware, addAttendance);
 router.get("/attendance", authMiddleware, getAttendance);
+
+router.post("/add-subject", authMiddleware, addSubject);
+
+router.get("/subjects", authMiddleware, getSubjects);
 module.exports = router;
