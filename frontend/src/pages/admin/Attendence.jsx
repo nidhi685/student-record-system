@@ -5,6 +5,7 @@ import Layout from "../../components/layout/Layout";
 const Attendance = () => {
 
     const [students, setStudents] = useState([]);
+    const [subjects, setSubjects] = useState([]);
 
     const [attendanceData, setAttendanceData] = useState({
         studentId: "",
@@ -29,8 +30,18 @@ const Attendance = () => {
         }
     };
 
+    const getSubjects = async () => {
+        try {
+            const res = await API.get("/admin/subjects");
+            setSubjects(res.data.subjects);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     useEffect(() => {
         fetchStudents();
+        getSubjects();
     }, []);
 
     // Handle Change
@@ -131,20 +142,29 @@ const Attendance = () => {
 
                             {/* Subject */}
                             <div>
-
                                 <label className="block text-gray-700 font-semibold mb-2">
                                     Subject
                                 </label>
 
-                                <input
-                                    type="text"
+                                <select
                                     name="subject"
                                     value={attendanceData.subject}
                                     onChange={handleChange}
-                                    placeholder="Enter subject"
                                     className="w-full border border-gray-300 p-4 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                                />
+                                >
+                                    <option value="">
+                                        Select Subject
+                                    </option>
 
+                                    {subjects.map((subject) => (
+                                        <option
+                                            key={subject._id}
+                                            value={subject.subjectName}
+                                        >
+                                            {subject.subjectName} ({subject.subjectCode})
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
 
                             {/* Percentage */}
@@ -174,19 +194,18 @@ const Attendance = () => {
 
                                 <div
                                     className={`inline-block px-4 py-2 rounded-full text-white font-medium
-                                    ${
-                                        attendanceData.percentage >= 75
+                                    ${attendanceData.percentage >= 75
                                             ? "bg-green-500"
                                             : attendanceData.percentage >= 50
-                                            ? "bg-yellow-500"
-                                            : "bg-red-500"
-                                    }`}
+                                                ? "bg-yellow-500"
+                                                : "bg-red-500"
+                                        }`}
                                 >
                                     {attendanceData.percentage >= 75
                                         ? "Excellent Attendance"
                                         : attendanceData.percentage >= 50
-                                        ? "Average Attendance"
-                                        : "Low Attendance"}
+                                            ? "Average Attendance"
+                                            : "Low Attendance"}
                                 </div>
 
                             </div>

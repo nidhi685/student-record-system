@@ -8,7 +8,7 @@ const AddMarks = () => {
     const navigate = useNavigate();
 
     const [students, setStudents] = useState([]);
-
+    const [subjects, setSubjects] = useState([]);
     const [form, setForm] = useState({
         studentId: "",
         subject: "",
@@ -35,10 +35,18 @@ const AddMarks = () => {
         }
     };
 
+    const getSubjects = async () => {
+        try {
+            const res = await API.get("/admin/subjects");
+            setSubjects(res.data.subjects);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     useEffect(() => {
-
         getStudents();
-
+        getSubjects();
     }, []);
 
     // HANDLE CHANGE
@@ -148,20 +156,29 @@ const AddMarks = () => {
 
                         {/* Subject */}
                         <div>
-
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Subject
                             </label>
 
-                            <input
-                                type="text"
+                            <select
                                 name="subject"
-                                placeholder="Enter subject"
                                 value={form.subject}
                                 onChange={handleChange}
                                 className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500"
-                            />
+                            >
+                                <option value="">
+                                    Select Subject
+                                </option>
 
+                                {subjects.map((subject) => (
+                                    <option
+                                        key={subject._id}
+                                        value={subject.subjectName}
+                                    >
+                                        {subject.subjectName} ({subject.subjectCode})
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         {/* Marks */}
