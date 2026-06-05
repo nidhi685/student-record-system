@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Layout from "../../components/layout/Layout";
 
 const Subjects = () => {
@@ -10,7 +11,7 @@ const Subjects = () => {
 
     const [subjects, setSubjects] = useState([]);
 
-    // Handle Input Change
+    // Input Change
     const handleChange = (e) => {
         setSubjectData({
             ...subjectData,
@@ -18,22 +19,79 @@ const Subjects = () => {
         });
     };
 
+    // Get All Subjects
+    const getSubjects = async () => {
+        try {
+
+            const token = localStorage.getItem("token");
+
+            const res = await axios.get(
+                "http://localhost:5000/api/admin/subjects",
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (res.data.success) {
+                setSubjects(res.data.subjects);
+            }
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     // Add Subject
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!subjectData.subjectName || !subjectData.subjectCode) {
+        if (
+            !subjectData.subjectName ||
+            !subjectData.subjectCode
+        ) {
             alert("Please fill all fields");
             return;
         }
 
-        setSubjects([...subjects, subjectData]);
+        try {
 
-        setSubjectData({
-            subjectName: "",
-            subjectCode: "",
-        });
+            const token = localStorage.getItem("token");
+
+            const res = await axios.post(
+                "http://localhost:5000/api/admin/add-subject",
+                subjectData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            alert(res.data.message);
+
+            setSubjectData({
+                subjectName: "",
+                subjectCode: "",
+            });
+
+            getSubjects();
+
+        } catch (error) {
+
+            alert(
+                error.response?.data?.message ||
+                "Something went wrong"
+            );
+
+            console.log(error);
+        }
     };
+
+    useEffect(() => {
+        getSubjects();
+    }, []);
 
     return (
         <Layout>
@@ -104,63 +162,69 @@ const Subjects = () => {
                         Subject List
                     </h2>
 
-                    <table className="w-full border-collapse">
+                    <div className="overflow-x-auto">
 
-                        <thead>
+                        <table className="w-full border-collapse">
 
-                            <tr className="bg-gray-100">
+                            <thead>
 
-                                <th className="p-3 text-left">
-                                    Subject Name
-                                </th>
+                                <tr className="bg-gray-100">
 
-                                <th className="p-3 text-left">
-                                    Subject Code
-                                </th>
+                                    <th className="p-3 text-left border">
+                                        Subject Name
+                                    </th>
 
-                            </tr>
+                                    <th className="p-3 text-left border">
+                                        Subject Code
+                                    </th>
 
-                        </thead>
+                                </tr>
 
-                        <tbody>
+                            </thead>
 
-                            {subjects.length > 0 ? (
-                                subjects.map((subject, index) => (
+                            <tbody>
 
-                                    <tr
-                                        key={index}
-                                        className="border-b"
-                                    >
+                                {subjects.length > 0 ? (
 
-                                        <td className="p-3">
-                                            {subject.subjectName}
-                                        </td>
+                                    subjects.map((subject) => (
 
-                                        <td className="p-3">
-                                            {subject.subjectCode}
+                                        <tr
+                                            key={subject._id}
+                                            className="border-b"
+                                        >
+
+                                            <td className="p-3 border">
+                                                {subject.subjectName}
+                                            </td>
+
+                                            <td className="p-3 border">
+                                                {subject.subjectCode}
+                                            </td>
+
+                                        </tr>
+
+                                    ))
+
+                                ) : (
+
+                                    <tr>
+
+                                        <td
+                                            colSpan="2"
+                                            className="p-4 text-center text-gray-500"
+                                        >
+                                            No Subjects Found
                                         </td>
 
                                     </tr>
 
-                                ))
-                            ) : (
+                                )}
 
-                                <tr>
+                            </tbody>
 
-                                    <td
-                                        colSpan="2"
-                                        className="p-4 text-center text-gray-500"
-                                    >
-                                        No Subjects Added
-                                    </td>
+                        </table>
 
-                                </tr>
-
-                            )}
-
-                        </tbody>
-
-                    </table>
+                    </div>
 
                 </div>
 
