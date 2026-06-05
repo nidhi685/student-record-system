@@ -1,6 +1,7 @@
 const Admin = require("../models/Admin");
 const Student = require("../models/Student");
 const Marks = require("../models/Marks");
+const Subject = require("../models/Subject");
 const Attendance = require("../models/Attendence");
 const bcrypt = require("bcryptjs");
 const generateToken = require("../utils/generateToken");
@@ -612,4 +613,53 @@ exports.getAttendance = async (req, res) => {
       message: "Server Error",
     });
   }
+};
+
+// Add Subject
+exports.addSubject = async (req, res) => {
+    try {
+        const { subjectName, subjectCode } = req.body;
+
+        const existingSubject = await Subject.findOne({
+            subjectCode,
+        });
+
+        if (existingSubject) {
+            return res.status(400).json({
+                success: false,
+                message: "Subject already exists",
+            });
+        }
+
+        const subject = await Subject.create({
+            subjectName,
+            subjectCode,
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Subject added successfully",
+            subject,
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: error.message,
+        });
+    }
+};
+
+// Get All Subjects
+exports.getSubjects = async (req, res) => {
+    try {
+        const subjects = await Subject.find();
+
+        res.status(200).json({
+            success: true,
+            subjects,
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: error.message,
+        });
+    }
 };
