@@ -52,7 +52,9 @@ const AttendanceList = () => {
                 <th className="p-3 text-left">
                   Course
                 </th>
-
+                <th className="p-3 text-left">
+                  Semester
+                </th>
                 <th className="p-3 text-left">
                   Subject
                 </th>
@@ -83,7 +85,9 @@ const AttendanceList = () => {
                     <td className="p-3">
                       {item.studentId?.course}
                     </td>
-
+                    <td className="p-3">
+                      Sem {item.semester}
+                    </td>
                     <td className="p-3">
                       {item.subject}
                     </td>
@@ -92,13 +96,12 @@ const AttendanceList = () => {
 
                       <span
                         className={`px-3 py-1 rounded-full text-white text-sm
-                        ${
-                          item.percentage >= 75
+                        ${item.percentage >= 75
                             ? "bg-green-500"
                             : item.percentage >= 50
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
-                        }`}
+                              ? "bg-yellow-500"
+                              : "bg-red-500"
+                          }`}
                       >
                         {item.percentage}%
                       </span>
