@@ -88,7 +88,9 @@ const MarksList = () => {
                                     <th className="p-4 text-left">
                                         Course
                                     </th>
-
+                                    <th className="p-4 text-left">
+                                        Semester
+                                    </th>
                                     <th className="p-4 text-left">
                                         Subject
                                     </th>
@@ -127,7 +129,9 @@ const MarksList = () => {
                                             <td className="p-4 text-gray-600">
                                                 {m.studentId?.course}
                                             </td>
-
+                                            <td className="p-4 text-gray-600">
+                                                Sem {m.studentId?.semester}
+                                            </td>
                                             <td className="p-4 text-gray-600">
                                                 {m.subject}
                                             </td>
