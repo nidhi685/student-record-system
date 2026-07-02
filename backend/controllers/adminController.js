@@ -5,6 +5,7 @@ const Subject = require("../models/Subject");
 const Attendance = require("../models/Attendence");
 const bcrypt = require("bcryptjs");
 const generateToken = require("../utils/generateToken");
+const PDFDocument = require("pdfkit");
 
 //admin register
 
@@ -453,11 +454,12 @@ exports.getReports = async (req, res) => {
             if (!studentResults[studentId]) {
 
                 studentResults[studentId] = {
-                    studentName: mark.studentId.name,
-                    course: mark.studentId.course,
-                    total: 0,
-                    count: 0,
-                };
+    studentId: mark.studentId._id,
+    studentName: mark.studentId.name,
+    course: mark.studentId.course,
+    total: 0,
+    count: 0,
+};
             }
 
             studentResults[studentId].total += mark.marks;
@@ -482,12 +484,12 @@ exports.getReports = async (req, res) => {
                 }
 
                 return {
-                    studentName: student.studentName,
-                    course: student.course,
-                    percentage:
-                        percentage.toFixed(2),
-                    grade,
-                };
+    studentId: student.studentId,
+    studentName: student.studentName,
+    course: student.course,
+    percentage: percentage.toFixed(2),
+    grade,
+};
             });
 
         res.status(200).json(reports);
@@ -661,5 +663,217 @@ exports.getSubjects = async (req, res) => {
         res.status(500).json({
             message: error.message,
         });
+    }
+};
+
+//download pdf 
+
+exports.downloadReport = async (req, res) => {
+    try {
+
+        const student = await Student.findById(req.params.id);
+
+        if (!student) {
+            return res.status(404).json({
+                message: "Student not found",
+            });
+        }
+
+        const marks = await Marks.find({
+            studentId: req.params.id,
+        });
+
+        let total = 0;
+
+        marks.forEach((item) => {
+            total += item.marks;
+        });
+
+        const percentage =
+            marks.length > 0
+                ? (total / marks.length).toFixed(2)
+                : "0.00";
+
+        let grade = "F";
+
+        if (percentage >= 80) grade = "A";
+        else if (percentage >= 60) grade = "B";
+        else if (percentage >= 35) grade = "C";
+
+        const doc = new PDFDocument({
+            margin: 40,
+        });
+
+        res.setHeader("Content-Type", "application/pdf");
+
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename=${student.name}_Report.pdf`
+        );
+
+        doc.pipe(res);
+
+        // ===================== TITLE =====================
+
+        doc
+            .fillColor("#1E3A8A")
+            .fontSize(24)
+            .text("STUDENT RESULT REPORT", {
+                align: "center",
+            });
+
+        doc
+            .fillColor("gray")
+            .fontSize(11)
+            .text("Student Record Management System", {
+                align: "center",
+            });
+
+        doc.moveDown();
+
+        doc
+            .moveTo(40, 90)
+            .lineTo(555, 90)
+            .stroke("#2563EB");
+
+        // ===================== STUDENT INFO =====================
+
+        doc.roundedRect(40, 110, 515, 100, 8).stroke();
+
+        doc.fillColor("black");
+
+        doc.fontSize(12);
+
+        doc.text(`Name : ${student.name}`, 60, 130);
+
+        doc.text(
+            `Enrollment : ${student.enrollment}`,
+            320,
+            130
+        );
+
+        doc.text(
+            `Course : ${student.course}`,
+            60,
+            160
+        );
+
+        doc.text(
+            `Total Subjects : ${marks.length}`,
+            320,
+            160
+        );
+
+        // ===================== TABLE =====================
+
+        let tableTop = 240;
+
+        doc.save();
+
+        doc
+            .fillColor("#2563EB")
+            .rect(40, tableTop, 515, 28)
+            .fill();
+
+        doc.restore();
+
+        doc
+            .fillColor("white")
+            .fontSize(12);
+
+        doc.text("Subject", 60, tableTop + 8);
+
+        doc.text("Marks", 260, tableTop + 8);
+
+        doc.text("Grade", 430, tableTop + 8);
+
+        let y = tableTop + 28;
+
+        marks.forEach((item, index) => {
+
+            if (index % 2 === 0) {
+
+                doc.save();
+
+                doc
+                    .fillColor("#F3F4F6")
+                    .rect(40, y, 515, 25)
+                    .fill();
+
+                doc.restore();
+            }
+
+            doc.rect(40, y, 515, 25).stroke();
+
+            doc.fillColor("black");
+
+            doc.text(item.subject, 60, y + 7);
+
+            doc.text(
+                item.marks.toString(),
+                270,
+                y + 7
+            );
+
+            doc.text(item.grade, 440, y + 7);
+
+            y += 25;
+
+        });
+
+        // ===================== SUMMARY =====================
+
+        y += 25;
+
+        doc.roundedRect(330, y, 225, 80, 8).stroke();
+
+        doc
+            .fontSize(12)
+            .fillColor("black");
+
+        doc.text(
+            `Percentage : ${percentage}%`,
+            350,
+            y + 20
+        );
+
+        doc.text(
+            `Final Grade : ${grade}`,
+            350,
+            y + 45
+        );
+
+        // ===================== FOOTER =====================
+
+        doc.moveDown(4);
+
+        doc.moveTo(40, 730).lineTo(555, 730).stroke("#999");
+
+        doc
+            .fontSize(10)
+            .fillColor("gray");
+
+        doc.text(
+            `Generated On : ${new Date().toLocaleDateString()}`,
+            40,
+            740
+        );
+
+        doc.text(
+            "Student Record Management System",
+            320,
+            740
+        );
+
+        doc.end();
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            message: error.message,
+        });
+
     }
 };
