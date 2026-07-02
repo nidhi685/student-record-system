@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import Layout from "../../components/layout/Layout";
+import { useNavigate } from "react-router-dom";
 
 const Attendance = () => {
+    const navigate = useNavigate();
 
     const [students, setStudents] = useState([]);
     const [subjects, setSubjects] = useState([]);
+    const [filteredSubjects, setFilteredSubjects] = useState([]);
 
     const [attendanceData, setAttendanceData] = useState({
         studentId: "",
@@ -18,38 +21,73 @@ const Attendance = () => {
 
         try {
 
-            const res = await API.get(
-                "/admin/students"
-            );
+            const res = await API.get("/admin/students");
 
             setStudents(res.data.students);
 
         } catch (error) {
 
             console.log(error);
+
         }
     };
 
+    // Fetch Subjects
     const getSubjects = async () => {
+
         try {
+
             const res = await API.get("/admin/subjects");
+
             setSubjects(res.data.subjects);
+
         } catch (error) {
+
             console.log(error);
+
         }
     };
 
     useEffect(() => {
+
         fetchStudents();
         getSubjects();
+
     }, []);
 
     // Handle Change
     const handleChange = (e) => {
 
+        const { name, value } = e.target;
+
+        if (name === "studentId") {
+
+            const selectedStudent = students.find(
+                (student) => student._id === value
+            );
+
+            if (selectedStudent) {
+
+                const semSubjects = subjects.filter(
+                    (subject) =>
+                        subject.course === selectedStudent.course &&
+                        Number(subject.semester) === Number(selectedStudent.semester)
+                );
+                setFilteredSubjects(semSubjects);
+
+                setAttendanceData({
+                    studentId: value,
+                    subject: "",
+                    percentage: attendanceData.percentage,
+                });
+
+                return;
+            }
+        }
+
         setAttendanceData({
             ...attendanceData,
-            [e.target.name]: e.target.value,
+            [name]: value,
         });
     };
 
@@ -74,9 +112,12 @@ const Attendance = () => {
                 percentage: "",
             });
 
+            setFilteredSubjects([]);
+            navigate('/attendance-list')
         } catch (error) {
 
             console.log(error);
+
         }
     };
 
@@ -104,7 +145,7 @@ const Attendance = () => {
 
                     <form onSubmit={handleSubmit}>
 
-                        {/* Student Select */}
+                        {/* Student */}
                         <div className="mb-6">
 
                             <label className="block text-gray-700 font-semibold mb-2">
@@ -128,7 +169,7 @@ const Attendance = () => {
                                         key={student._id}
                                         value={student._id}
                                     >
-                                        {student.name}
+                                        {student.name} ({student.course} - Sem {student.semester})                        
                                     </option>
 
                                 ))}
@@ -137,11 +178,12 @@ const Attendance = () => {
 
                         </div>
 
-                        {/* Subject + Percentage */}
+                        {/* Subject & Percentage */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 
                             {/* Subject */}
                             <div>
+
                                 <label className="block text-gray-700 font-semibold mb-2">
                                     Subject
                                 </label>
@@ -152,19 +194,34 @@ const Attendance = () => {
                                     onChange={handleChange}
                                     className="w-full border border-gray-300 p-4 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                 >
+
                                     <option value="">
                                         Select Subject
                                     </option>
 
-                                    {subjects.map((subject) => (
-                                        <option
-                                            key={subject._id}
-                                            value={subject.subjectName}
-                                        >
-                                            {subject.subjectName} ({subject.subjectCode})
+                                    {filteredSubjects.length > 0 ? (
+
+                                        filteredSubjects.map((subject) => (
+
+                                            <option
+                                                key={subject._id}
+                                                value={subject.subjectName}
+                                            >
+                                                {subject.subjectName} ({subject.subjectCode})
+                                            </option>
+
+                                        ))
+
+                                    ) : (
+
+                                        <option disabled>
+                                            No Subjects Available
                                         </option>
-                                    ))}
+
+                                    )}
+
                                 </select>
+
                             </div>
 
                             {/* Percentage */}
@@ -179,7 +236,7 @@ const Attendance = () => {
                                     name="percentage"
                                     value={attendanceData.percentage}
                                     onChange={handleChange}
-                                    placeholder="Enter percentage"
+                                    placeholder="Enter Attendance Percentage"
                                     className="w-full border border-gray-300 p-4 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                 />
 
@@ -187,7 +244,7 @@ const Attendance = () => {
 
                         </div>
 
-                        {/* Attendance Status Preview */}
+                        {/* Attendance Status */}
                         {attendanceData.percentage && (
 
                             <div className="mb-6">
@@ -201,18 +258,20 @@ const Attendance = () => {
                                                 : "bg-red-500"
                                         }`}
                                 >
+
                                     {attendanceData.percentage >= 75
                                         ? "Excellent Attendance"
                                         : attendanceData.percentage >= 50
                                             ? "Average Attendance"
                                             : "Low Attendance"}
+
                                 </div>
 
                             </div>
 
                         )}
 
-                        {/* Submit Button */}
+                        {/* Button */}
                         <div className="flex justify-end">
 
                             <button

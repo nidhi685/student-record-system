@@ -9,6 +9,7 @@ const AddMarks = () => {
 
     const [students, setStudents] = useState([]);
     const [subjects, setSubjects] = useState([]);
+    const [filteredSubjects, setFilteredSubjects] = useState([]);
     const [form, setForm] = useState({
         studentId: "",
         subject: "",
@@ -52,10 +53,40 @@ const AddMarks = () => {
     // HANDLE CHANGE
     const handleChange = (e) => {
 
-        setForm({
-            ...form,
-            [e.target.name]: e.target.value,
-        });
+        const { name, value } = e.target;
+
+        if (name === "studentId") {
+
+            const selectedStudent = students.find(
+                (student) => student._id === value
+            );
+
+            if (selectedStudent) {
+
+                const semSubjects = subjects.filter(
+                    (subject) =>
+                        subject.course === selectedStudent.course &&
+                        Number(subject.semester) === Number(selectedStudent.semester)
+                );
+
+                setFilteredSubjects(semSubjects);
+            }
+
+            setForm({
+                ...form,
+                studentId: value,
+                subject: "",
+            });
+
+        } else {
+
+            setForm({
+                ...form,
+                [name]: value,
+            });
+
+        }
+
     };
 
     // HANDLE SUBMIT
@@ -80,7 +111,7 @@ const AddMarks = () => {
                 marks: "",
                 grade: "",
             });
-
+            setFilteredSubjects([]);
             // REDIRECT TO MARKS LIST
             navigate("/marks");
 
@@ -145,7 +176,7 @@ const AddMarks = () => {
                                         key={s._id}
                                         value={s._id}
                                     >
-                                        {s.name}
+                                        {s.name} ({s.course} - Sem {s.semester})
                                     </option>
 
                                 ))}
@@ -170,14 +201,26 @@ const AddMarks = () => {
                                     Select Subject
                                 </option>
 
-                                {subjects.map((subject) => (
-                                    <option
-                                        key={subject._id}
-                                        value={subject.subjectName}
-                                    >
-                                        {subject.subjectName} ({subject.subjectCode})
+                                {filteredSubjects.length > 0 ? (
+
+                                    filteredSubjects.map((subject) => (
+
+                                        <option
+                                            key={subject._id}
+                                            value={subject.subjectName}
+                                        >
+                                            {subject.subjectName} ({subject.subjectCode})
+                                        </option>
+
+                                    ))
+
+                                ) : (
+
+                                    <option disabled>
+                                        No Subject Available
                                     </option>
-                                ))}
+
+                                )}
                             </select>
                         </div>
 
