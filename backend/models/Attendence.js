@@ -13,6 +13,11 @@ const attendanceSchema = mongoose.Schema({
     required: true,
   },
 
+  semester: {
+    type: Number,
+    required: true,
+  },
+
   percentage: {
     type: Number,
     required: true,
