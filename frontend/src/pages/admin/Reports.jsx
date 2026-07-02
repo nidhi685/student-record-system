@@ -22,6 +22,40 @@ const Reports = () => {
             console.log(error);
         }
     };
+const handleDownload = async (id, studentName) => {
+    try {
+
+        const response = await API.get(
+            `/admin/reports/download/${id}`,
+            {
+                responseType: "blob",
+            }
+        );
+
+        const url = window.URL.createObjectURL(
+            new Blob([response.data])
+        );
+
+        const link =
+            document.createElement("a");
+
+        link.href = url;
+        link.download = `${studentName}_Report.pdf`;
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        link.remove();
+
+        window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+
+        console.log(error);
+
+    }
+};
 
     useEffect(() => {
         fetchReports();
@@ -113,10 +147,16 @@ const Reports = () => {
                                         <td className="p-3">
 
                                             <button
-                                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
-                                            >
-                                                Download PDF
-                                            </button>
+    onClick={() =>
+        handleDownload(
+            report.studentId,
+            report.studentName
+        )
+    }
+    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+>
+    Download PDF
+</button>
 
                                         </td>
 
