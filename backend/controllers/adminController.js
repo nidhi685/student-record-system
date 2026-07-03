@@ -5,6 +5,7 @@ const Subject = require("../models/Subject");
 const Attendance = require("../models/Attendence");
 const bcrypt = require("bcryptjs");
 const generateToken = require("../utils/generateToken");
+const PDFDocument = require("pdfkit");
 
 //admin register
 
@@ -212,54 +213,37 @@ exports.deleteStudent = async (req, res) => {
     }
 };
 
-//dashboard data
 // DASHBOARD DATA
 exports.getDashboard = async (req, res) => {
-
     try {
-
         // TOTAL STUDENTS
-        const totalStudents =
-            await Student.countDocuments();
+        const totalStudents = await Student.countDocuments();
 
         // TOTAL MARKS RECORDS
-        const totalMarks =
-            await Marks.countDocuments();
+        const totalMarks = await Marks.countDocuments();
 
         // AVERAGE MARKS
-        const marksData =
-            await Marks.find();
+        const marksData = await Marks.find();
 
         let averageMarks = 0;
 
         if (marksData.length > 0) {
+            const total = marksData.reduce((acc, item) => acc + item.marks, 0);
 
-            const total = marksData.reduce(
-                (acc, item) =>
-                    acc + item.marks,
-                0
-            );
-
-            averageMarks =
-                (total / marksData.length)
-                .toFixed(1);
+            averageMarks = (total / marksData.length).toFixed(1);
         }
 
         // TOTAL COURSES
-        const courses =
-            await Student.distinct("course");
+        const courses = await Student.distinct("course");
 
-        const totalCourses =
-            courses.length;
+        const totalCourses = courses.length;
 
         // RECENT STUDENTS
-        const recentStudents =
-            await Student.find()
-                .sort({ createdAt: -1 })
-                .limit(5);
+        const recentStudents = await Student.find()
+            .sort({ createdAt: -1 })
+            .limit(5);
 
         res.json({
-
             success: true,
 
             totalStudents,
@@ -272,9 +256,7 @@ exports.getDashboard = async (req, res) => {
 
             recentStudents,
         });
-
     } catch (error) {
-
         res.status(500).json({
             message: error.message,
         });
@@ -338,14 +320,11 @@ exports.addMarks = async (req, res) => {
 
 // GET ALL MARKS
 exports.getAllMarks = async (req, res) => {
-
     try {
-
-        const marks = await Marks.find()
-            .populate(
-                "studentId",
-                "name enrollment course"
-            );
+        const marks = await Marks.find().populate(
+            "studentId",
+            "name enrollment course semester",
+        );
 
         // console.log(marks);
 
@@ -353,9 +332,7 @@ exports.getAllMarks = async (req, res) => {
             success: true,
             marks,
         });
-
     } catch (error) {
-
         console.log(error);
 
         res.status(500).json({
@@ -364,14 +341,10 @@ exports.getAllMarks = async (req, res) => {
     }
 };
 
-
 // ================= RESULT ANALYTICS =================
 exports.getResultAnalytics = async (req, res) => {
-
     try {
-
-        const marks = await Marks.find()
-            .populate("studentId");
+        const marks = await Marks.find().populate("studentId");
 
         let passStudents = 0;
         let failStudents = 0;
@@ -382,11 +355,9 @@ exports.getResultAnalytics = async (req, res) => {
         const studentResults = {};
 
         marks.forEach((mark) => {
-
             const studentId = mark.studentId._id;
 
             if (!studentResults[studentId]) {
-
                 studentResults[studentId] = {
                     name: mark.studentId.name,
                     total: 0,
@@ -400,9 +371,7 @@ exports.getResultAnalytics = async (req, res) => {
         });
 
         Object.values(studentResults).forEach((student) => {
-
-            const percentage =
-                student.total / student.count;
+            const percentage = student.total / student.count;
 
             if (percentage >= 35) {
                 passStudents++;
@@ -411,7 +380,6 @@ exports.getResultAnalytics = async (req, res) => {
             }
 
             if (percentage > topperPercentage) {
-
                 topperPercentage = percentage;
 
                 topper = student.name;
@@ -422,12 +390,9 @@ exports.getResultAnalytics = async (req, res) => {
             passStudents,
             failStudents,
             topper,
-            topperPercentage:
-                topperPercentage.toFixed(2),
+            topperPercentage: topperPercentage.toFixed(2),
         });
-
     } catch (error) {
-
         console.log(error);
 
         res.status(500).json({
@@ -438,21 +403,17 @@ exports.getResultAnalytics = async (req, res) => {
 
 // ================= REPORTS =================
 exports.getReports = async (req, res) => {
-
     try {
-
-        const marks = await Marks.find()
-            .populate("studentId");
+        const marks = await Marks.find().populate("studentId");
 
         const studentResults = {};
 
         marks.forEach((mark) => {
-
             const studentId = mark.studentId._id;
 
             if (!studentResults[studentId]) {
-
                 studentResults[studentId] = {
+                    studentId: mark.studentId._id,
                     studentName: mark.studentId.name,
                     course: mark.studentId.course,
                     total: 0,
@@ -465,35 +426,30 @@ exports.getReports = async (req, res) => {
             studentResults[studentId].count += 1;
         });
 
-        const reports = Object.values(studentResults)
-            .map((student) => {
+        const reports = Object.values(studentResults).map((student) => {
+            const percentage = student.total / student.count;
 
-                const percentage =
-                    student.total / student.count;
+            let grade = "F";
 
-                let grade = "F";
+            if (percentage >= 80) {
+                grade = "A";
+            } else if (percentage >= 60) {
+                grade = "B";
+            } else if (percentage >= 35) {
+                grade = "C";
+            }
 
-                if (percentage >= 80) {
-                    grade = "A";
-                } else if (percentage >= 60) {
-                    grade = "B";
-                } else if (percentage >= 35) {
-                    grade = "C";
-                }
-
-                return {
-                    studentName: student.studentName,
-                    course: student.course,
-                    percentage:
-                        percentage.toFixed(2),
-                    grade,
-                };
-            });
+            return {
+                studentId: student.studentId,
+                studentName: student.studentName,
+                course: student.course,
+                percentage: percentage.toFixed(2),
+                grade,
+            };
+        });
 
         res.status(200).json(reports);
-
     } catch (error) {
-
         console.log(error);
 
         res.status(500).json({
@@ -504,17 +460,11 @@ exports.getReports = async (req, res) => {
 
 // ================= GET ADMIN PROFILE =================
 exports.getAdminProfile = async (req, res) => {
-
     try {
-
-        const admin = await Admin.findById(
-            req.user.id
-        ).select("-password");
+        const admin = await Admin.findById(req.user.id).select("-password");
 
         res.status(200).json(admin);
-
     } catch (error) {
-
         console.log(error);
 
         res.status(500).json({
@@ -525,29 +475,23 @@ exports.getAdminProfile = async (req, res) => {
 
 // ================= UPDATE ADMIN PROFILE =================
 exports.updateAdminProfile = async (req, res) => {
-
     try {
-
         const { name, email } = req.body;
 
-        const updatedAdmin =
-            await Admin.findByIdAndUpdate(
-                req.user.id,
-                {
-                    name,
-                    email,
-                },
-                { new: true }
-            );
+        const updatedAdmin = await Admin.findByIdAndUpdate(
+            req.user.id,
+            {
+                name,
+                email,
+            },
+            { new: true },
+        );
 
         res.status(200).json({
-            message:
-                "Profile Updated Successfully",
+            message: "Profile Updated Successfully",
             updatedAdmin,
         });
-
     } catch (error) {
-
         console.log(error);
 
         res.status(500).json({
@@ -558,30 +502,32 @@ exports.updateAdminProfile = async (req, res) => {
 
 // ================= ADD ATTENDANCE =================
 exports.addAttendance = async (req, res) => {
-
     try {
+        const { studentId, subject, percentage } = req.body;
 
-        const {
+        // Check Student
+        const student = await Student.findById(studentId);
+
+        if (!student) {
+            return res.status(404).json({
+                message: "Student not found",
+            });
+        }
+
+        // Create Attendance
+        const attendance = await Attendance.create({
             studentId,
             subject,
+            semester: student.semester,
             percentage,
-        } = req.body;
-
-        const attendance =
-            await Attendance.create({
-                studentId,
-                subject,
-                percentage,
-            });
-
-        res.status(201).json({
-            message:
-                "Attendance Added Successfully",
-            attendance,
         });
 
+        res.status(201).json({
+            success: true,
+            message: "Attendance Added Successfully",
+            attendance,
+        });
     } catch (error) {
-
         console.log(error);
 
         res.status(500).json({
@@ -590,38 +536,36 @@ exports.addAttendance = async (req, res) => {
     }
 };
 
+// get attendance
 exports.getAttendance = async (req, res) => {
+    try {
+        const attendance = await Attendance.find().populate(
+            "studentId",
+            "name course semester",
+        );
 
-  try {
+        res.status(200).json({
+            success: true,
+            attendance,
+        });
+    } catch (error) {
+        console.log(error);
 
-    const attendance = await Attendance.find()
-      .populate(
-        "studentId",
-        "name course"
-      );
-
-    res.status(200).json({
-      success: true,
-      attendance,
-    });
-
-  } catch (error) {
-
-    console.log(error);
-
-    res.status(500).json({
-      message: "Server Error",
-    });
-  }
+        res.status(500).json({
+            message: "Server Error",
+        });
+    }
 };
 
 // Add Subject
 exports.addSubject = async (req, res) => {
     try {
-        const { subjectName, subjectCode } = req.body;
+        const { subjectName, subjectCode, course, semester } = req.body;
 
         const existingSubject = await Subject.findOne({
             subjectCode,
+            course,
+            semester,
         });
 
         if (existingSubject) {
@@ -634,6 +578,8 @@ exports.addSubject = async (req, res) => {
         const subject = await Subject.create({
             subjectName,
             subjectCode,
+            course,
+            semester,
         });
 
         res.status(201).json({
@@ -651,7 +597,10 @@ exports.addSubject = async (req, res) => {
 // Get All Subjects
 exports.getSubjects = async (req, res) => {
     try {
-        const subjects = await Subject.find();
+        const subjects = await Subject.find().sort({
+            semester: 1,
+            subjectName: 1,
+        });
 
         res.status(200).json({
             success: true,
@@ -661,5 +610,242 @@ exports.getSubjects = async (req, res) => {
         res.status(500).json({
             message: error.message,
         });
+    }
+};
+
+//download pdf
+
+exports.downloadReport = async (req, res) => {
+    try {
+
+        const student = await Student.findById(req.params.id);
+
+        if (!student) {
+            return res.status(404).json({
+                message: "Student not found",
+            });
+        }
+
+        const marks = await Marks.find({
+            studentId: req.params.id,
+        });
+
+        let total = 0;
+
+        marks.forEach((item) => {
+            total += item.marks;
+        });
+
+        const percentage =
+            marks.length > 0
+                ? (total / marks.length).toFixed(2)
+                : "0.00";
+
+        let grade = "F";
+
+        if (percentage >= 80) grade = "A";
+        else if (percentage >= 60) grade = "B";
+        else if (percentage >= 35) grade = "C";
+
+        const doc = new PDFDocument({
+            margin: 40,
+        });
+
+        res.setHeader(
+            "Content-Type",
+            "application/pdf"
+        );
+
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename=${student.name}_Report.pdf`
+        );
+
+        doc.pipe(res);
+
+        // ===================== TITLE =====================
+
+        doc.fillColor("#1E3A8A")
+            .fontSize(24)
+            .text("STUDENT RESULT REPORT", {
+                align: "center",
+            });
+
+        doc.fillColor("gray")
+            .fontSize(11)
+            .text("Student Record Management System", {
+                align: "center",
+            });
+
+        doc.moveDown();
+
+        doc.moveTo(40, 90)
+            .lineTo(555, 90)
+            .stroke("#2563EB");
+
+        // ===================== STUDENT INFO =====================
+
+        doc.roundedRect(40, 110, 515, 120, 8).stroke();
+
+        doc.fillColor("black");
+        doc.fontSize(12);
+
+        doc.text(`Name : ${student.name}`, 60, 130);
+
+        doc.text(
+            `Enrollment : ${student.enrollment}`,
+            320,
+            130
+        );
+
+        doc.text(
+            `Course : ${student.course}`,
+            60,
+            160
+        );
+
+        doc.text(
+            `Semester : ${student.semester}`,
+            320,
+            160
+        );
+
+        doc.text(
+            `Total Subjects : ${marks.length}`,
+            60,
+            190
+        );
+
+        // ===================== TABLE =====================
+
+        let tableTop = 260;
+
+        doc.save();
+
+        doc.fillColor("#2563EB")
+            .rect(40, tableTop, 515, 28)
+            .fill();
+
+        doc.restore();
+
+        doc.fillColor("white")
+            .fontSize(12);
+
+        doc.text(
+            "Subject",
+            60,
+            tableTop + 8
+        );
+
+        doc.text(
+            "Marks",
+            260,
+            tableTop + 8
+        );
+
+        doc.text(
+            "Grade",
+            430,
+            tableTop + 8
+        );
+
+        let y = tableTop + 28;
+
+        marks.forEach((item, index) => {
+
+            if (index % 2 === 0) {
+
+                doc.save();
+
+                doc.fillColor("#F3F4F6")
+                    .rect(40, y, 515, 25)
+                    .fill();
+
+                doc.restore();
+            }
+
+            doc.rect(40, y, 515, 25).stroke();
+
+            doc.fillColor("black");
+
+            doc.text(
+                item.subject,
+                60,
+                y + 7
+            );
+
+            doc.text(
+                item.marks.toString(),
+                270,
+                y + 7
+            );
+
+            doc.text(
+                item.grade,
+                440,
+                y + 7
+            );
+
+            y += 25;
+        });
+
+        // ===================== SUMMARY =====================
+
+        y += 25;
+
+        doc.roundedRect(
+            330,
+            y,
+            225,
+            80,
+            8
+        ).stroke();
+
+        doc.fontSize(12)
+            .fillColor("black");
+
+        doc.text(
+            `Percentage : ${percentage}%`,
+            350,
+            y + 20
+        );
+
+        doc.text(
+            `Final Grade : ${grade}`,
+            350,
+            y + 45
+        );
+
+        // ===================== FOOTER =====================
+
+        doc.moveTo(40, 730)
+            .lineTo(555, 730)
+            .stroke("#999");
+
+        doc.fontSize(10)
+            .fillColor("gray");
+
+        doc.text(
+            `Generated On : ${new Date().toLocaleDateString()}`,
+            40,
+            740
+        );
+
+        doc.text(
+            "Student Record Management System",
+            320,
+            740
+        );
+
+        doc.end();
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            message: error.message,
+        });
+
     }
 };

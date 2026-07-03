@@ -7,6 +7,8 @@ const Subjects = () => {
     const [subjectData, setSubjectData] = useState({
         subjectName: "",
         subjectCode: "",
+        course: "",
+        semester: "",
     });
 
     const [subjects, setSubjects] = useState([]);
@@ -46,10 +48,11 @@ const Subjects = () => {
     // Add Subject
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (
             !subjectData.subjectName ||
-            !subjectData.subjectCode
+            !subjectData.subjectCode ||
+            !subjectData.course ||
+            !subjectData.semester
         ) {
             alert("Please fill all fields");
             return;
@@ -74,6 +77,8 @@ const Subjects = () => {
             setSubjectData({
                 subjectName: "",
                 subjectCode: "",
+                course: "",
+                semester: "",
             });
 
             getSubjects();
@@ -142,6 +147,69 @@ const Subjects = () => {
                             />
 
                         </div>
+                        <div className="mb-4">
+
+                            <label className="block mb-2 font-semibold">
+                                Course
+                            </label>
+
+                            <select
+                                name="course"
+                                value={subjectData.course}
+                                onChange={handleChange}
+                                className="w-full border p-3 rounded-lg"
+                            >
+                                <option value="">
+                                    Select Course
+                                </option>
+
+                                <option value="MCA">
+                                    MCA
+                                </option>
+
+                                <option value="BCA">
+                                    BCA
+                                </option>
+
+                                <option value="BSc IT">
+                                    BSc IT
+                                </option>
+
+                                <option value="BTech">
+                                    BTech
+                                </option>
+
+                            </select>
+
+                        </div>
+                        <div className="mb-4">
+
+                            <label className="block mb-2 font-semibold">
+                                Semester
+                            </label>
+
+                            <select
+                                name="semester"
+                                value={subjectData.semester}
+                                onChange={handleChange}
+                                className="w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">
+                                    Select Semester
+                                </option>
+
+                                {[1, 2, 3, 4, 5, 6].map((sem) => (
+                                    <option
+                                        key={sem}
+                                        value={sem}
+                                    >
+                                        Semester {sem}
+                                    </option>
+                                ))}
+
+                            </select>
+
+                        </div>
 
                         {/* Button */}
                         <button
@@ -177,7 +245,12 @@ const Subjects = () => {
                                     <th className="p-3 text-left border">
                                         Subject Code
                                     </th>
-
+                                    <th className="p-3 text-left border">
+                                        Course
+                                    </th>
+                                    <th className="p-3 text-left border">
+                                        Semester
+                                    </th>
                                 </tr>
 
                             </thead>
@@ -200,6 +273,12 @@ const Subjects = () => {
                                             <td className="p-3 border">
                                                 {subject.subjectCode}
                                             </td>
+                                            <td className="p-3 border">
+                                                {subject.course}
+                                            </td>
+                                            <td className="p-3 border">
+                                                Sem {subject.semester}
+                                            </td>
 
                                         </tr>
 
@@ -210,7 +289,7 @@ const Subjects = () => {
                                     <tr>
 
                                         <td
-                                            colSpan="2"
+                                            colSpan="4"
                                             className="p-4 text-center text-gray-500"
                                         >
                                             No Subjects Found

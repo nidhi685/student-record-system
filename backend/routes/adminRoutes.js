@@ -21,6 +21,7 @@ const {
     getAttendance,
     addSubject,
     getSubjects,
+    downloadReport,
 } = require("../controllers/adminController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -74,4 +75,5 @@ router.get("/attendance", authMiddleware, getAttendance);
 router.post("/add-subject", authMiddleware, addSubject);
 
 router.get("/subjects", authMiddleware, getSubjects);
+router.get("/reports/download/:id", authMiddleware, downloadReport);
 module.exports = router;

@@ -47,14 +47,18 @@ const Sidebar = () => {
 
                 {/* Logo */}
                 <div className="mb-8 border-b border-gray-800 pb-5">
-
-                    <h2 className="text-3xl font-bold tracking-wide">
+                    <img
+                        src="/stu_rec_logo.png"
+                        alt="Student Record Logo"
+                        className="h-13 mx-auto"
+                    />
+                    {/* <h2 className="text-3xl font-bold tracking-wide">
                         Student ERP
                     </h2>
 
                     <p className="text-gray-400 text-sm mt-1">
                         Management System
-                    </p>
+                    </p> */}
 
                 </div>
 
