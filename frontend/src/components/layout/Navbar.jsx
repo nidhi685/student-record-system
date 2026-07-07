@@ -1,75 +1,84 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { AuthContext } from "../../pages/context/AuthContext";
 import { LogOut } from "lucide-react";
 
 const Navbar = () => {
+  const { user, logout } = useContext(AuthContext);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
-    const { user, logout } =
-        useContext(AuthContext);
+  return (
+    <div className="bg-white shadow-md px-6 py-4 flex justify-between items-center border-b">
+      {/* Left Section */}
+      <div>
+        <h1 className="text-2xl font-bold text-gray-800">
+          Student Record System
+        </h1>
 
-    return (
+        <p className="text-sm text-gray-500 mt-1">Welcome back 👋</p>
+      </div>
 
-        <div className="bg-white shadow-md px-6 py-4 flex justify-between items-center border-b">
+      {/* Right Section */}
+      <div className="flex items-center gap-4">
+        {/* User Info */}
+        <div className="flex items-center gap-3 bg-gray-100 px-4 py-2 rounded-xl shadow-sm">
+          {/* Avatar */}
+          <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg">
+            {user?.name?.charAt(0)}
+          </div>
 
-            {/* Left Section */}
-            <div>
+          {/* Name & Role */}
+          <div className="hidden sm:block">
+            <h3 className="font-semibold text-gray-800 text-sm">
+              {user?.name}
+            </h3>
 
-                <h1 className="text-2xl font-bold text-gray-800">
-                    Student Record System
-                </h1>
-
-                <p className="text-sm text-gray-500 mt-1">
-                    Welcome back 👋
-                </p>
-
-            </div>
-
-            {/* Right Section */}
-            <div className="flex items-center gap-4">
-
-                {/* User Info */}
-                <div className="flex items-center gap-3 bg-gray-100 px-4 py-2 rounded-xl shadow-sm">
-
-                    {/* Avatar */}
-                    <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg">
-
-                        {user?.name?.charAt(0)}
-
-                    </div>
-
-                    {/* Name & Role */}
-                    <div className="hidden sm:block">
-
-                        <h3 className="font-semibold text-gray-800 text-sm">
-                            {user?.name}
-                        </h3>
-
-                        <p className="text-xs text-gray-500 capitalize">
-                            {user?.role}
-                        </p>
-
-                    </div>
-
-                </div>
-
-                {/* Logout Button */}
-                <button
-                    onClick={logout}
-                    className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition shadow-md"
-                >
-
-                    <LogOut size={18} />
-
-                    <span className="hidden md:block">
-                        Logout
-                    </span>
-
-                </button>
-
-            </div>
-
+            <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
+          </div>
         </div>
-    );
+
+        {/* Logout Button */}
+        <button
+          onClick={() => setShowLogoutDialog(true)}
+          className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition shadow-md"
+        >
+          <LogOut size={18} />
+          <span className="hidden md:block">Logout</span>
+        </button>
+      </div>
+      {showLogoutDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl w-96 p-6">
+            <h2 className="text-xl font-semibold text-gray-800">
+              Confirm Logout
+            </h2>
+
+            <p className="text-gray-600 mt-3">
+              Are you sure you want to logout?
+            </p>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowLogoutDialog(false)}
+                className="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => {
+                  logout();
+                  setShowLogoutDialog(false);
+                }}
+                className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
+              >
+                Yes, Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default Navbar;
